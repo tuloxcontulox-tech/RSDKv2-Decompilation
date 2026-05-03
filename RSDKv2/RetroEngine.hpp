@@ -122,15 +122,7 @@ enum RetroStates {
 #define SCREEN_CENTERY (SCREEN_YSIZE / 2)
 
 #if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_UWP || RETRO_PLATFORM == RETRO_PS3
-#if RETRO_USING_SDL2
 #include <SDL.h>
-#elif RETRO_USING_SDL1
-#if RETRO_PLATFORM == RETRO_PS3
-#include <SDL.h>
-#else
-#include <SDL.h>
-#endif
-#endif
 #include <vorbis/vorbisfile.h>
 #elif RETRO_PLATFORM == RETRO_OSX
 #include <SDL2/SDL.h>
