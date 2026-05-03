@@ -89,7 +89,7 @@ bool LoadFile(const char *filePath, FileInfo *fileInfo) {
     }
 #endif
 
-#if RETRO_PLATFORM == RETRO_OSX
+#if RETRO_PLATFORM == RETRO_OSX || RETRO_PLATFORM == RETRO_PS3
     if (addPath) {
         char pathBuf[0x100];
         sprintf(pathBuf, "%s/%s", gamePath, filePathBuf);
@@ -433,7 +433,7 @@ bool LoadFile2(const char *filePath, FileInfo *fileInfo) {
     }
 #endif
 
-#if RETRO_PLATFORM == RETRO_OSX
+#if RETRO_PLATFORM == RETRO_OSX || RETRO_PLATFORM == RETRO_PS3
     if (addPath) {
         char pathBuf[0x100];
         sprintf(pathBuf, "%s/%s", gamePath, filePathBuf);

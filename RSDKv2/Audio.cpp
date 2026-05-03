@@ -50,6 +50,11 @@ SDL_AudioDeviceID audioDevice;
 int InitSoundDevice()
 {
     StopAllSfx(); //"init"
+#if RETRO_PLATFORM == RETRO_PS3 && !defined(RETRO_USING_SDL1)
+    // Stub for native PS3 audio initialization
+    audioEnabled = false;
+    return true;
+#endif
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
     SDL_AudioSpec want;
     want.freq     = AUDIO_FREQUENCY;
@@ -151,7 +156,11 @@ void LoadGlobalSfx()
     for (int i = 0; i < CHANNEL_COUNT; ++i) sfxChannels[i].sfxID = -1;
 }
 
-#if RETRO_USING_SDL1 || RETRO_USING_SDL2
+#ifndef RETRO_DISABLE_AUDIO
+#if RETRO_PLATFORM == RETRO_PS3
+#include <vorbis/codec.h>
+#endif
+
 size_t readVorbis(void *mem, size_t size, size_t nmemb, void *ptr)
 {
     MusicPlaybackInfo *info = (MusicPlaybackInfo *)ptr;
@@ -183,6 +192,9 @@ int closeVorbis(void *ptr)
 
 void ProcessMusicStream(Sint32 *stream, size_t bytes_wanted)
 {
+#ifdef RETRO_DISABLE_AUDIO
+    return;
+#endif
     if (!musInfo.loaded)
         return;
     switch (musicStatus) {
@@ -336,7 +348,7 @@ void ProcessAudioPlayback(void *userdata, Uint8 *stream, int len)
                     }
                 }
 
-#if RETRO_USING_SDL1 || RETRO_USING_SDL2
+#if RETRO_USING_SDL1 || RETRO_USING_SDL2 || RETRO_PLATFORM == RETRO_PS3
                 ProcessAudioMixing(mix_buffer, buffer, samples_done, sfxVolume, sfx->pan);
 #endif
             }
@@ -361,7 +373,7 @@ void ProcessAudioPlayback(void *userdata, Uint8 *stream, int len)
     }
 }
 
-#if RETRO_USING_SDL1 || RETRO_USING_SDL2
+#if RETRO_USING_SDL1 || RETRO_USING_SDL2 || RETRO_PLATFORM == RETRO_PS3
 void ProcessAudioMixing(Sint32 *dst, const Sint16 *src, int len, int volume, sbyte pan)
 {
     if (volume == 0)
@@ -403,20 +415,20 @@ void ProcessAudioMixing(Sint32 *dst, const Sint16 *src, int len, int volume, sby
 }
 #endif
 
-void LoadMusic(void *userdata)
+int LoadMusic(void *userdata)
 {
     (void)userdata;
 
     if (trackBuffer < 0 || trackBuffer >= TRACK_COUNT) {
         StopMusic();
-        return;
+        return 0;
     }
 
     TrackInfo *trackPtr = &musicTracks[trackBuffer];
 
     if (!trackPtr->fileName[0]) {
         StopMusic();
-        return;
+        return 0;
     }
 
     if (musInfo.loaded)
@@ -427,6 +439,7 @@ void LoadMusic(void *userdata)
         musInfo.loaded    = true;
 
         unsigned long long samples = 0;
+#ifndef RETRO_DISABLE_AUDIO
         ov_callbacks callbacks;
 
         callbacks.read_func  = readVorbis;
@@ -440,6 +453,7 @@ void LoadMusic(void *userdata)
 
         musInfo.vorbBitstream = -1;
         musInfo.vorbisFile.vi = ov_info(&musInfo.vorbisFile, -1);
+#endif
 
 #if RETRO_USING_SDL2
         musInfo.stream = SDL_NewAudioStream(AUDIO_S16, musInfo.vorbisFile.vi->channels, musInfo.vorbisFile.vi->rate, audioDeviceFormat.format,
@@ -451,8 +465,13 @@ void LoadMusic(void *userdata)
 
 #if RETRO_USING_SDL1
         musInfo.spec.format   = AUDIO_S16;
+#ifndef RETRO_DISABLE_AUDIO
         musInfo.spec.channels = musInfo.vorbisFile.vi->channels;
         musInfo.spec.freq     = (int)musInfo.vorbisFile.vi->rate;
+#else
+        musInfo.spec.channels = 2;
+        musInfo.spec.freq     = 44100;
+#endif
 #endif
 
         musInfo.buffer = new Sint16[MIX_BUFFER_SAMPLES];
@@ -462,6 +481,8 @@ void LoadMusic(void *userdata)
         CurrentMusicTrack      = trackBuffer;
         trackBuffer  = -1;
     }
+
+    return 0;
 }
 
 void SetMusicTrack(char *filePath, byte trackID, bool loop)
@@ -482,11 +503,20 @@ bool PlayMusic(int track)
     if (track < 0 || track >= TRACK_COUNT) {
         StopMusic();
         trackBuffer = -1;
+        UnlockAudioDevice();
         return false;
     }
     trackBuffer = track;
     musicStatus = MUSIC_LOADING;
-    SDL_CreateThread((SDL_ThreadFunction)LoadMusic, "LoadMusic", NULL);
+#if RETRO_PLATFORM == RETRO_PS3
+    LoadMusic(NULL);
+#else
+    SDL_CreateThread(LoadMusic,
+#if RETRO_USING_SDL2
+    "LoadMusic",
+#endif
+    NULL);
+#endif
     UnlockAudioDevice();
     return true;
 }

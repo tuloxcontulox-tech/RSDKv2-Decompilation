@@ -85,6 +85,16 @@ void InitUserdata()
         ini.SetInteger("Keyboard 1", "Start", inputDevice[INPUT_START].keyMappings = SDLK_RETURN);
 
         ini.SetComment("Controller 1", "IC1Comment", "Controller Mappings for P1 (Based on: https://wiki.libsdl.org/SDL_GameControllerButton)");
+#if RETRO_PLATFORM == RETRO_PS3
+        ini.SetInteger("Controller 1", "Up", inputDevice[INPUT_UP].contMappings = 8);
+        ini.SetInteger("Controller 1", "Down", inputDevice[INPUT_DOWN].contMappings = 6);
+        ini.SetInteger("Controller 1", "Left", inputDevice[INPUT_LEFT].contMappings = 7);
+        ini.SetInteger("Controller 1", "Right", inputDevice[INPUT_RIGHT].contMappings = 5);
+        ini.SetInteger("Controller 1", "A", inputDevice[INPUT_BUTTONA].contMappings = 2);
+        ini.SetInteger("Controller 1", "B", inputDevice[INPUT_BUTTONB].contMappings = 1);
+        ini.SetInteger("Controller 1", "C", inputDevice[INPUT_BUTTONC].contMappings = 3);
+        ini.SetInteger("Controller 1", "Start", inputDevice[INPUT_START].contMappings = 11);
+#else
         ini.SetInteger("Controller 1", "Up", inputDevice[INPUT_UP].contMappings = 1);
         ini.SetInteger("Controller 1", "Down", inputDevice[INPUT_DOWN].contMappings = 2);
         ini.SetInteger("Controller 1", "Left", inputDevice[INPUT_LEFT].contMappings = 3);
@@ -93,6 +103,7 @@ void InitUserdata()
         ini.SetInteger("Controller 1", "B", inputDevice[INPUT_BUTTONB].contMappings = 6);
         ini.SetInteger("Controller 1", "C", inputDevice[INPUT_BUTTONC].contMappings = 7);
         ini.SetInteger("Controller 1", "Start", inputDevice[INPUT_START].contMappings = 8);
+#endif
 #endif
 
         ini.Write(BASE_PATH"settings.ini");
@@ -211,21 +222,53 @@ void InitUserdata()
             inputDevice[7].keyMappings = SDLK_RETURN;
 
         if (!ini.GetInteger("Controller 1", "Up", &inputDevice[INPUT_UP].contMappings))
+#if RETRO_PLATFORM == RETRO_PS3
+            inputDevice[0].contMappings = 8;
+#else
             inputDevice[0].contMappings = 1;
+#endif
         if (!ini.GetInteger("Controller 1", "Down", &inputDevice[INPUT_DOWN].contMappings))
+#if RETRO_PLATFORM == RETRO_PS3
+            inputDevice[1].contMappings = 6;
+#else
             inputDevice[1].contMappings = 2;
+#endif
         if (!ini.GetInteger("Controller 1", "Left", &inputDevice[INPUT_LEFT].contMappings))
+#if RETRO_PLATFORM == RETRO_PS3
+            inputDevice[2].contMappings = 7;
+#else
             inputDevice[2].contMappings = 3;
+#endif
         if (!ini.GetInteger("Controller 1", "Right", &inputDevice[INPUT_RIGHT].contMappings))
+#if RETRO_PLATFORM == RETRO_PS3
+            inputDevice[3].contMappings = 5;
+#else
             inputDevice[3].contMappings = 4;
+#endif
         if (!ini.GetInteger("Controller 1", "A", &inputDevice[INPUT_BUTTONA].contMappings))
+#if RETRO_PLATFORM == RETRO_PS3
+            inputDevice[4].contMappings = 2;
+#else
             inputDevice[4].contMappings = 5;
+#endif
         if (!ini.GetInteger("Controller 1", "B", &inputDevice[INPUT_BUTTONB].contMappings))
+#if RETRO_PLATFORM == RETRO_PS3
+            inputDevice[5].contMappings = 1;
+#else
             inputDevice[5].contMappings = 6;
+#endif
         if (!ini.GetInteger("Controller 1", "C", &inputDevice[INPUT_BUTTONC].contMappings))
+#if RETRO_PLATFORM == RETRO_PS3
+            inputDevice[6].contMappings = 3;
+#else
             inputDevice[6].contMappings = 7;
+#endif
         if (!ini.GetInteger("Controller 1", "Start", &inputDevice[INPUT_START].contMappings))
+#if RETRO_PLATFORM == RETRO_PS3
+            inputDevice[7].contMappings = 11;
+#else
             inputDevice[7].contMappings = 8;
+#endif
 #endif
     }
     SetScreenSize(SCREEN_XSIZE, SCREEN_YSIZE);

@@ -146,6 +146,37 @@ int InitRenderDevice() {
     Engine.borderless = false; // disabled
 #endif
 
+#if RETRO_PLATFORM == RETRO_PS3 && !defined(RETRO_USING_SDL1)
+    psglInitSettings init_settings = {
+        PSGL_INIT_MAX_SPUS | PSGL_INIT_INITIALIZE_SPUS,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    };
+    psglInit(&init_settings);
+
+    PSGLdevice* device = psglCreateDeviceAuto(GL_ARGB_SCE, GL_DEPTH_COMPONENT24, GL_MULTISAMPLING_4X_SAMPLES_SCE);
+    psglMakeCurrent(psglCreateContext(device), device);
+    psglResetCurrentContext();
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrthof(0, SCREEN_XSIZE, SCREEN_YSIZE, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glEnable(GL_TEXTURE_2D);
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_XSIZE, SCREEN_YSIZE, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
+#endif
+
     OBJECT_BORDER_X2 = SCREEN_XSIZE + 0x80;
     // OBJECT_BORDER_Y2 = SCREEN_YSIZE + 0x100;
 
@@ -310,6 +341,21 @@ void FlipScreen() {
 
     SDL_RenderPresent(Engine.renderer);
 #endif
+
+#if RETRO_PLATFORM == RETRO_PS3 && !defined(RETRO_USING_SDL1)
+    glClear(GL_COLOR_BUFFER_BIT);
+    // Note: This logic assumes 16-bit color mode as per RSDKv2 defaults
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SCREEN_XSIZE, SCREEN_YSIZE, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, Engine.FrameBuffer);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f); glVertex2f(0.0f, 0.0f);
+    glTexCoord2f(1.0f, 0.0f); glVertex2f(SCREEN_XSIZE, 0.0f);
+    glTexCoord2f(1.0f, 1.0f); glVertex2f(SCREEN_XSIZE, SCREEN_YSIZE);
+    glTexCoord2f(0.0f, 1.0f); glVertex2f(0.0f, SCREEN_YSIZE);
+    glEnd();
+
+    psglSwap();
+#endif
 }
 
 void ReleaseRenderDevice() {
@@ -327,6 +373,10 @@ void ReleaseRenderDevice() {
 #if RETRO_USING_SDL2
     SDL_DestroyRenderer(Engine.renderer);
     SDL_DestroyWindow(Engine.window);
+#endif
+
+#if RETRO_PLATFORM == RETRO_PS3 && !defined(RETRO_USING_SDL1)
+    psglExit();
 #endif
 }
 

@@ -74,14 +74,27 @@ typedef unsigned int uint;
 #else
 #error "Unknown Apple platform"
 #endif
+#elif defined __PS3__ || defined __CELLOS_LV2__ || defined __SNC__
+#define RETRO_PLATFORM (RETRO_PS3)
 #else
 #define RETRO_PLATFORM (RETRO_WIN) // Default
 #endif
+
+// Ensure RETRO_PLATFORM is defined and not 0 if possible,
+// but we keep the values as they are to match original engine constants.
 
 #if RETRO_PLATFORM == RETRO_UWP
 #define BASE_PATH            ""
 #define DEFAULT_SCREEN_XSIZE 320
 #define DEFAULT_FULLSCREEN   false
+#elif RETRO_PLATFORM == RETRO_PS3
+#define BASE_PATH ""
+#define DEFAULT_SCREEN_XSIZE 320
+#define DEFAULT_FULLSCREEN   true
+#ifdef RETRO_USING_SDL1
+#define RETRO_USING_MOUSE
+#define RETRO_USING_TOUCH
+#endif
 #else
 #define BASE_PATH ""
 #define RETRO_USING_MOUSE
@@ -93,6 +106,11 @@ typedef unsigned int uint;
 #if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_OSX || RETRO_PLATFORM == RETRO_iOS || RETRO_PLATFORM == RETRO_UWP
 #define RETRO_USING_SDL1 (0)
 #define RETRO_USING_SDL2 (1)
+#elif RETRO_PLATFORM == RETRO_PS3
+#ifndef RETRO_USING_SDL1
+#define RETRO_USING_SDL1 (0) // Default to native PSGL on PS3
+#endif
+#define RETRO_USING_SDL2 (0)
 #else // Since its an else & not an elif these platforms probably aren't supported yet
 #define RETRO_USING_SDL1 (0)
 #define RETRO_USING_SDL2 (0)
@@ -110,12 +128,20 @@ enum RetroStates {
 #define SCREEN_CENTERY (SCREEN_YSIZE / 2)
 
 #if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_UWP
-#if RETRO_USING_SDL2
 #include <SDL.h>
-#elif RETRO_USING_SDL1
-#include <SDL.h>
-#endif
 #include <vorbis/vorbisfile.h>
+#elif RETRO_PLATFORM == RETRO_PS3
+#if RETRO_USING_SDL1
+#include <SDL.h>
+#else
+#include <PSGL/psgl.h>
+#include <PSGL/psglu.h>
+#include <cell/pad.h>
+#include <sysutil/sysutil_common.h>
+#endif
+#ifndef RETRO_DISABLE_AUDIO
+#include <vorbis/vorbisfile.h>
+#endif
 #elif RETRO_PLATFORM == RETRO_OSX
 #include <SDL2/SDL.h>
 #include <Vorbis/vorbisfile.h>

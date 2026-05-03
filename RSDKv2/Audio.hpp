@@ -3,7 +3,9 @@
 
 #include <stdlib.h>
 
+#ifndef RETRO_DISABLE_AUDIO
 #include <vorbis/vorbisfile.h>
+#endif
 
 #if RETRO_PLATFORM != RETRO_VITA
 #include "SDL.h"
@@ -22,7 +24,9 @@ struct TrackInfo {
 };
 
 struct MusicPlaybackInfo {
+#ifndef RETRO_DISABLE_AUDIO
     OggVorbis_File vorbisFile;
+#endif
     int vorbBitstream;
 #if RETRO_USING_SDL1
     SDL_AudioSpec spec;
@@ -102,7 +106,9 @@ inline void freeMusInfo()
         if (musInfo.stream)
             SDL_FreeAudioStream(musInfo.stream);
 #endif
+#ifndef RETRO_DISABLE_AUDIO
         ov_clear(&musInfo.vorbisFile);
+#endif
         musInfo.buffer       = nullptr;
 #if RETRO_USING_SDL2
         musInfo.stream = nullptr;
@@ -126,7 +132,9 @@ inline void freeMusInfo()
 
         if (musInfo.buffer)
             delete[] musInfo.buffer;
+#ifndef RETRO_DISABLE_AUDIO
         ov_clear(&musInfo.vorbisFile);
+#endif
         musInfo.buffer    = nullptr;
         musInfo.trackLoop = false;
         musInfo.loaded    = false;
@@ -137,7 +145,7 @@ inline void freeMusInfo()
 }
 #endif
 
-void LoadMusic(void *userdata);
+int LoadMusic(void *userdata);
 void SetMusicTrack(char *filePath, byte trackID, bool loop);
 bool PlayMusic(int track);
 inline void StopMusic()

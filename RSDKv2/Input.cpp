@@ -213,6 +213,35 @@ void controllerClose(byte controllerID) {
 }
 
 void ReadInputDevice() {
+#if RETRO_PLATFORM == RETRO_PS3 && !defined(RETRO_USING_SDL1)
+    CellPadData padData;
+    if (cellPadGetData(0, &padData) == CELL_PAD_OK && padData.len > 0) {
+        inputDevice[INPUT_UP].press = (padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_UP);
+        inputDevice[INPUT_DOWN].press = (padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_DOWN);
+        inputDevice[INPUT_LEFT].press = (padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_LEFT);
+        inputDevice[INPUT_RIGHT].press = (padData.button[CELL_PAD_BTN_OFFSET_DIGITAL2] & CELL_PAD_CTRL_RIGHT);
+
+        inputDevice[INPUT_BUTTONA].press = (padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_CROSS);
+        inputDevice[INPUT_BUTTONB].press = (padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_CIRCLE);
+        inputDevice[INPUT_BUTTONC].press = (padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_SQUARE);
+        inputDevice[INPUT_START].press = (padData.button[CELL_PAD_BTN_OFFSET_DIGITAL1] & CELL_PAD_CTRL_START);
+
+        inputDevice[INPUT_UP].hold = inputDevice[INPUT_UP].press;
+        inputDevice[INPUT_DOWN].hold = inputDevice[INPUT_DOWN].press;
+        inputDevice[INPUT_LEFT].hold = inputDevice[INPUT_LEFT].press;
+        inputDevice[INPUT_RIGHT].hold = inputDevice[INPUT_RIGHT].press;
+        inputDevice[INPUT_BUTTONA].hold = inputDevice[INPUT_BUTTONA].press;
+        inputDevice[INPUT_BUTTONB].hold = inputDevice[INPUT_BUTTONB].press;
+        inputDevice[INPUT_BUTTONC].hold = inputDevice[INPUT_BUTTONC].press;
+        inputDevice[INPUT_START].hold = inputDevice[INPUT_START].press;
+
+        anyPress = inputDevice[INPUT_UP].press || inputDevice[INPUT_DOWN].press ||
+                   inputDevice[INPUT_LEFT].press || inputDevice[INPUT_RIGHT].press ||
+                   inputDevice[INPUT_BUTTONA].press || inputDevice[INPUT_BUTTONB].press ||
+                   inputDevice[INPUT_BUTTONC].press || inputDevice[INPUT_START].press;
+    }
+#endif
+
 #if RETRO_USING_SDL2
     int length           = 0;
     const byte *keyState = SDL_GetKeyboardState(&length);
