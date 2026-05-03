@@ -74,7 +74,7 @@ typedef unsigned int uint;
 #else
 #error "Unknown Apple platform"
 #endif
-#elif defined __PS3__
+#elif defined __PS3__ || defined __CELLOS_LV2__ || defined __SNC__
 #define RETRO_PLATFORM (RETRO_PS3)
 #else
 #define RETRO_PLATFORM (RETRO_WIN) // Default
@@ -125,7 +125,11 @@ enum RetroStates {
 #if RETRO_USING_SDL2
 #include <SDL.h>
 #elif RETRO_USING_SDL1
+#if RETRO_PLATFORM == RETRO_PS3
+#include <SDL/SDL.h>
+#else
 #include <SDL.h>
+#endif
 #endif
 #include <vorbis/vorbisfile.h>
 #elif RETRO_PLATFORM == RETRO_OSX

@@ -152,6 +152,10 @@ void LoadGlobalSfx()
 }
 
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
+#if RETRO_PLATFORM == RETRO_PS3
+#include <vorbis/codec.h>
+#endif
+
 size_t readVorbis(void *mem, size_t size, size_t nmemb, void *ptr)
 {
     MusicPlaybackInfo *info = (MusicPlaybackInfo *)ptr;
@@ -403,20 +407,32 @@ void ProcessAudioMixing(Sint32 *dst, const Sint16 *src, int len, int volume, sby
 }
 #endif
 
+#if RETRO_USING_SDL2
+int LoadMusic(void *userdata)
+#else
 void LoadMusic(void *userdata)
+#endif
 {
     (void)userdata;
 
     if (trackBuffer < 0 || trackBuffer >= TRACK_COUNT) {
         StopMusic();
+#if RETRO_USING_SDL2
+        return 0;
+#else
         return;
+#endif
     }
 
     TrackInfo *trackPtr = &musicTracks[trackBuffer];
 
     if (!trackPtr->fileName[0]) {
         StopMusic();
+#if RETRO_USING_SDL2
+        return 0;
+#else
         return;
+#endif
     }
 
     if (musInfo.loaded)
@@ -462,6 +478,10 @@ void LoadMusic(void *userdata)
         CurrentMusicTrack      = trackBuffer;
         trackBuffer  = -1;
     }
+
+#if RETRO_USING_SDL2
+    return 0;
+#endif
 }
 
 void SetMusicTrack(char *filePath, byte trackID, bool loop)
@@ -490,7 +510,11 @@ bool PlayMusic(int track)
 #if RETRO_PLATFORM == RETRO_PS3
     LoadMusic(NULL);
 #else
-    SDL_CreateThread((SDL_ThreadFunction)LoadMusic, "LoadMusic", NULL);
+    SDL_CreateThread(LoadMusic,
+#if RETRO_USING_SDL2
+    "LoadMusic",
+#endif
+    NULL);
 #endif
     UnlockAudioDevice();
     return true;
