@@ -91,6 +91,10 @@ typedef unsigned int uint;
 #define BASE_PATH ""
 #define DEFAULT_SCREEN_XSIZE 320
 #define DEFAULT_FULLSCREEN   true
+#ifdef RETRO_USING_SDL1
+#define RETRO_USING_MOUSE
+#define RETRO_USING_TOUCH
+#endif
 #else
 #define BASE_PATH ""
 #define RETRO_USING_MOUSE
@@ -103,7 +107,9 @@ typedef unsigned int uint;
 #define RETRO_USING_SDL1 (0)
 #define RETRO_USING_SDL2 (1)
 #elif RETRO_PLATFORM == RETRO_PS3
-#define RETRO_USING_SDL1 (1)
+#ifndef RETRO_USING_SDL1
+#define RETRO_USING_SDL1 (0) // Default to native PSGL on PS3
+#endif
 #define RETRO_USING_SDL2 (0)
 #else // Since its an else & not an elif these platforms probably aren't supported yet
 #define RETRO_USING_SDL1 (0)
@@ -121,8 +127,18 @@ enum RetroStates {
 #define SCREEN_YSIZE   (240)
 #define SCREEN_CENTERY (SCREEN_YSIZE / 2)
 
-#if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_UWP || RETRO_PLATFORM == RETRO_PS3
+#if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_UWP
 #include <SDL.h>
+#include <vorbis/vorbisfile.h>
+#elif RETRO_PLATFORM == RETRO_PS3
+#if RETRO_USING_SDL1
+#include <SDL.h>
+#else
+#include <PSGL/psgl.h>
+#include <PSGL/psglu.h>
+#include <cell/pad.h>
+#include <sysutil/sysutil_common.h>
+#endif
 #include <vorbis/vorbisfile.h>
 #elif RETRO_PLATFORM == RETRO_OSX
 #include <SDL2/SDL.h>

@@ -50,6 +50,11 @@ SDL_AudioDeviceID audioDevice;
 int InitSoundDevice()
 {
     StopAllSfx(); //"init"
+#if RETRO_PLATFORM == RETRO_PS3 && !defined(RETRO_USING_SDL1)
+    // Stub for native PS3 audio initialization
+    audioEnabled = false;
+    return true;
+#endif
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
     SDL_AudioSpec want;
     want.freq     = AUDIO_FREQUENCY;

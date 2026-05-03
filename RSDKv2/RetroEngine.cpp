@@ -25,6 +25,11 @@ inline int getLowerRate(int intendRate, int targetRate) {
 }
 
 bool processEvents() {
+#if RETRO_PLATFORM == RETRO_PS3 && !defined(RETRO_USING_SDL1)
+    // Basic sysutil callback processing for PS3 native
+    cellSysutilCheckCallback();
+    return true;
+#endif
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
     while (SDL_PollEvent(&Engine.sdlEvents)) {
         // Main Events
@@ -203,6 +208,10 @@ bool processEvents() {
 }
 
 void RetroEngine::Init() {
+#if RETRO_PLATFORM == RETRO_PS3 && !defined(RETRO_USING_SDL1)
+    cellSysutilInit();
+    cellPadInit(1);
+#endif
     CalculateTrigAngles();
 #if !RETRO_USE_ORIGINAL_CODE
     InitUserdata();
@@ -304,6 +313,10 @@ void RetroEngine::Run() {
 
 #if RETRO_USING_SDL1 || RETRO_USING_SDL2
     SDL_Quit();
+#endif
+
+#if RETRO_PLATFORM == RETRO_PS3 && !defined(RETRO_USING_SDL1)
+    cellPadEnd();
 #endif
 }
 
