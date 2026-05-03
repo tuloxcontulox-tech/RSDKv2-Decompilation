@@ -74,14 +74,23 @@ typedef unsigned int uint;
 #else
 #error "Unknown Apple platform"
 #endif
+#elif defined __PS3__
+#define RETRO_PLATFORM (RETRO_PS3)
 #else
 #define RETRO_PLATFORM (RETRO_WIN) // Default
 #endif
+
+// Ensure RETRO_PLATFORM is defined and not 0 if possible,
+// but we keep the values as they are to match original engine constants.
 
 #if RETRO_PLATFORM == RETRO_UWP
 #define BASE_PATH            ""
 #define DEFAULT_SCREEN_XSIZE 320
 #define DEFAULT_FULLSCREEN   false
+#elif RETRO_PLATFORM == RETRO_PS3
+#define BASE_PATH ""
+#define DEFAULT_SCREEN_XSIZE 320
+#define DEFAULT_FULLSCREEN   true
 #else
 #define BASE_PATH ""
 #define RETRO_USING_MOUSE
@@ -93,6 +102,9 @@ typedef unsigned int uint;
 #if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_OSX || RETRO_PLATFORM == RETRO_iOS || RETRO_PLATFORM == RETRO_UWP
 #define RETRO_USING_SDL1 (0)
 #define RETRO_USING_SDL2 (1)
+#elif RETRO_PLATFORM == RETRO_PS3
+#define RETRO_USING_SDL1 (1)
+#define RETRO_USING_SDL2 (0)
 #else // Since its an else & not an elif these platforms probably aren't supported yet
 #define RETRO_USING_SDL1 (0)
 #define RETRO_USING_SDL2 (0)
@@ -109,7 +121,7 @@ enum RetroStates {
 #define SCREEN_YSIZE   (240)
 #define SCREEN_CENTERY (SCREEN_YSIZE / 2)
 
-#if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_UWP
+#if RETRO_PLATFORM == RETRO_WIN || RETRO_PLATFORM == RETRO_UWP || RETRO_PLATFORM == RETRO_PS3
 #if RETRO_USING_SDL2
 #include <SDL.h>
 #elif RETRO_USING_SDL1

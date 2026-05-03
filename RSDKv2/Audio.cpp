@@ -482,11 +482,16 @@ bool PlayMusic(int track)
     if (track < 0 || track >= TRACK_COUNT) {
         StopMusic();
         trackBuffer = -1;
+        UnlockAudioDevice();
         return false;
     }
     trackBuffer = track;
     musicStatus = MUSIC_LOADING;
+#if RETRO_PLATFORM == RETRO_PS3
+    LoadMusic(NULL);
+#else
     SDL_CreateThread((SDL_ThreadFunction)LoadMusic, "LoadMusic", NULL);
+#endif
     UnlockAudioDevice();
     return true;
 }
