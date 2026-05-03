@@ -139,7 +139,9 @@ enum RetroStates {
 #include <cell/pad.h>
 #include <sysutil/sysutil_common.h>
 #endif
+#ifndef RETRO_DISABLE_AUDIO
 #include <vorbis/vorbisfile.h>
+#endif
 #elif RETRO_PLATFORM == RETRO_OSX
 #include <SDL2/SDL.h>
 #include <Vorbis/vorbisfile.h>

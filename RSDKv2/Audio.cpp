@@ -156,7 +156,7 @@ void LoadGlobalSfx()
     for (int i = 0; i < CHANNEL_COUNT; ++i) sfxChannels[i].sfxID = -1;
 }
 
-#if RETRO_USING_SDL1 || RETRO_USING_SDL2
+#ifndef RETRO_DISABLE_AUDIO
 #if RETRO_PLATFORM == RETRO_PS3
 #include <vorbis/codec.h>
 #endif
@@ -192,6 +192,9 @@ int closeVorbis(void *ptr)
 
 void ProcessMusicStream(Sint32 *stream, size_t bytes_wanted)
 {
+#ifdef RETRO_DISABLE_AUDIO
+    return;
+#endif
     if (!musInfo.loaded)
         return;
     switch (musicStatus) {
@@ -345,7 +348,7 @@ void ProcessAudioPlayback(void *userdata, Uint8 *stream, int len)
                     }
                 }
 
-#if RETRO_USING_SDL1 || RETRO_USING_SDL2
+#if RETRO_USING_SDL1 || RETRO_USING_SDL2 || RETRO_PLATFORM == RETRO_PS3
                 ProcessAudioMixing(mix_buffer, buffer, samples_done, sfxVolume, sfx->pan);
 #endif
             }
@@ -370,7 +373,7 @@ void ProcessAudioPlayback(void *userdata, Uint8 *stream, int len)
     }
 }
 
-#if RETRO_USING_SDL1 || RETRO_USING_SDL2
+#if RETRO_USING_SDL1 || RETRO_USING_SDL2 || RETRO_PLATFORM == RETRO_PS3
 void ProcessAudioMixing(Sint32 *dst, const Sint16 *src, int len, int volume, sbyte pan)
 {
     if (volume == 0)
@@ -436,6 +439,7 @@ int LoadMusic(void *userdata)
         musInfo.loaded    = true;
 
         unsigned long long samples = 0;
+#ifndef RETRO_DISABLE_AUDIO
         ov_callbacks callbacks;
 
         callbacks.read_func  = readVorbis;
@@ -449,6 +453,7 @@ int LoadMusic(void *userdata)
 
         musInfo.vorbBitstream = -1;
         musInfo.vorbisFile.vi = ov_info(&musInfo.vorbisFile, -1);
+#endif
 
 #if RETRO_USING_SDL2
         musInfo.stream = SDL_NewAudioStream(AUDIO_S16, musInfo.vorbisFile.vi->channels, musInfo.vorbisFile.vi->rate, audioDeviceFormat.format,
@@ -460,8 +465,13 @@ int LoadMusic(void *userdata)
 
 #if RETRO_USING_SDL1
         musInfo.spec.format   = AUDIO_S16;
+#ifndef RETRO_DISABLE_AUDIO
         musInfo.spec.channels = musInfo.vorbisFile.vi->channels;
         musInfo.spec.freq     = (int)musInfo.vorbisFile.vi->rate;
+#else
+        musInfo.spec.channels = 2;
+        musInfo.spec.freq     = 44100;
+#endif
 #endif
 
         musInfo.buffer = new Sint16[MIX_BUFFER_SAMPLES];
