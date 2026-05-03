@@ -126,17 +126,7 @@ enum RetroStates {
 #include <SDL.h>
 #elif RETRO_USING_SDL1
 #if RETRO_PLATFORM == RETRO_PS3
-#ifdef __has_include
-#if __has_include(<SDL.h>)
 #include <SDL.h>
-#elif __has_include(<SDL/SDL.h>)
-#include <SDL/SDL.h>
-#else
-#error "SDL.h not found! Please add the SDL include directory to your project settings."
-#endif
-#else
-#include <SDL.h>
-#endif
 #else
 #include <SDL.h>
 #endif

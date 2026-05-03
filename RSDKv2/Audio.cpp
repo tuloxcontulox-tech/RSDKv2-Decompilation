@@ -407,32 +407,20 @@ void ProcessAudioMixing(Sint32 *dst, const Sint16 *src, int len, int volume, sby
 }
 #endif
 
-#if RETRO_USING_SDL2
 int LoadMusic(void *userdata)
-#else
-void LoadMusic(void *userdata)
-#endif
 {
     (void)userdata;
 
     if (trackBuffer < 0 || trackBuffer >= TRACK_COUNT) {
         StopMusic();
-#if RETRO_USING_SDL2
         return 0;
-#else
-        return;
-#endif
     }
 
     TrackInfo *trackPtr = &musicTracks[trackBuffer];
 
     if (!trackPtr->fileName[0]) {
         StopMusic();
-#if RETRO_USING_SDL2
         return 0;
-#else
-        return;
-#endif
     }
 
     if (musInfo.loaded)
@@ -479,9 +467,7 @@ void LoadMusic(void *userdata)
         trackBuffer  = -1;
     }
 
-#if RETRO_USING_SDL2
     return 0;
-#endif
 }
 
 void SetMusicTrack(char *filePath, byte trackID, bool loop)

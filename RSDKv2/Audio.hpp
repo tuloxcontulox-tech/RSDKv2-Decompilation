@@ -137,11 +137,7 @@ inline void freeMusInfo()
 }
 #endif
 
-#if RETRO_USING_SDL2
 int LoadMusic(void *userdata);
-#else
-void LoadMusic(void *userdata);
-#endif
 void SetMusicTrack(char *filePath, byte trackID, bool loop);
 bool PlayMusic(int track);
 inline void StopMusic()

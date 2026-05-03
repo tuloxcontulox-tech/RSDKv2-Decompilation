@@ -5,7 +5,7 @@ add_executable(RetroEngine ${RETRO_FILES})
 # Force SDL1 for PS3 as SDL2 is not well-supported or available in psl1ght
 set(RETRO_SDL_VERSION 1 CACHE STRING "Select between SDL2 and SDL1, defaults to SDL2" FORCE)
 
-# Build dependencies from source for PS3
+# Build dependencies from source for PS3 if not found
 set(COMPILE_OGG TRUE CACHE BOOL "" FORCE)
 set(COMPILE_VORBIS TRUE CACHE BOOL "" FORCE)
 set(DEP_PATH ps3)
@@ -35,10 +35,11 @@ if(DEFINED ENV{PSL1GHT_SDK})
     # PS3 specific compiler flags
     target_compile_options(RetroEngine PRIVATE -O2 -Wall -mcpu=cell)
 else()
-    message(WARNING "PSL1GHT_SDK environment variable not set. PS3 build may fail.")
+    message(WARNING "PSL1GHT_SDK environment variable not set. PS3 build may fail.
+    Please set PSL1GHT_SDK to your PS3 SDK path (e.g. C:/ps3dev/psl1ght).")
 endif()
 
-if(RETRO_MOD_LOADER)
+if(RETRO_USE_MOD_LOADER)
     set_target_properties(RetroEngine PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
